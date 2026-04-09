@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPDPS App</title>
+
+<style>
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(to right, #667eea, #764ba2);
+  margin:0;
+}
+.container {
+  max-width:900px;
+  margin:auto;
+  padding:20px;
+}
+h1, p { text-align:center; color:white; }
+
+.card {
+  background:white;
+  padding:15px;
+  margin-bottom:10px;
+  border-radius:12px;
+}
+
+select {
+  width:100%;
+  padding:8px;
+  margin-top:8px;
+}
+
+button {
+  width:100%;
+  padding:12px;
+  font-size:16px;
+  background:#4CAF50;
+  color:white;
+  border:none;
+  border-radius:10px;
+}
+
+.progress {
+  background:#ddd;
+  border-radius:20px;
+  margin-bottom:15px;
+}
+.bar {
+  height:10px;
+  width:0%;
+  background:#00ffcc;
+  border-radius:20px;
+}
+
+.result { display:none; }
+.result-card {
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:10px;
+  color:white;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+<h1>SPDPS Assessment</h1>
+<p>5=SA | 4=A | 3=N | 2=D | 1=SD</p>
+
+<div class="progress"><div id="bar" class="bar"></div></div>
+
+<form id="form"></form>
+<button onclick="submitForm()">Submit</button>
+
+<div id="result" class="result"></div>
+</div>
+
+<script>
+
+const questions = [
+"1. I am aware of the common disaster risks (fire, typhoons, floods, earthquakes) in our lowland area.",
+"2. I can identify early warning signs of a storm surge or flood, including rising water levels in nearby areas.",
+"3. I know how to detect potential fire hazards in the school, such as exposed wires or open electrical outlets.",
+"4. I can recognize structural hazards during an earthquake, such as visible cracks in walls or ceilings.",
+"5. I am familiar with the safe evacuation routes in case of floods or earthquakes and fires.",
+"6. I am knowledgeable about local government warnings and alerts for disasters (e.g., NDDRMC alerts, local DRRM office advisories)",
+"7. I can perform basic first aid in case of injuries during a disaster or emergencies.",
+"8. I know how to operate fire extinguishers and other safety equipment safely.",
+"9. I can safely guide students and colleagues during evacuations caused by floods or typhoons.",
+"10. I can respond appropriately to flood situations by following school protocol, such as moving students to higher ground or safe areas.",
+"11. I am able to use communication tools effectively to report emergencies to authorities",
+"12. I am able to establish temporary protective measures to keep everyone safe during a disaster.",
+"13. I feel confident in my ability to handle emergencies involving fire, floods, typhoons, or earthquakes.",
+"14. I believe that recognizing early warning signs of hazards is important for ensuring school safety.",
+"15. I am motivated to participate in disaster preparedness drills and trainings.",
+"16. I remain calm and focused during emergency situations.",
+"17. I feel responsible for ensuring the safety of students during disasters.",
+"18. I believe my actions can positively affect the outcome of disaster situations.",
+"19. I can effectively communicate disaster instructions to students and colleagues.",
+"20. I coordinate with other teachers during drills and actual emergencies.",
+"21. I can promptly report disaster incidents to school authorities and local officials.",
+"22. I actively participate in team discussions regarding disaster preparedness plans.",
+"23. I can assist in coordinating evacuation and response activities with local responders.",
+"24. I collaborate with colleagues to relay updates and safety instructions during emergencies.",
+"25. I participate regularly in school disaster drills and training sessions.",
+"26. I help in developing or updating the school’s disaster preparedness plan.",
+"27. I encourage students and colleagues to follow safety protocols during disasters.",
+"28. I assist in maintaining emergency supplies and checking for hazards.",
+"29. I engage in community-based disaster preparedness activities.",
+"30. I regularly evaluate and provide feedback on the effectiveness of disaster preparedness measures in the school."
+];
+
+const domains = [
+{ name:"Knowledge and Awareness", items:[1,2,3,4,5,6]},
+{ name:"Skills and Response Capacity", items:[7,8,9,10,11,12]},
+{ name:"Attitudes and Self-Efficacy", items:[13,14,15,16,17,18]},
+{ name:"Communication and Coordination", items:[19,20,21,22,23,24]},
+{ name:"Participation and Preparedness Planning", items:[25,26,27,28,29,30]}
+];
+
+const form = document.getElementById("form");
+
+questions.forEach((q,i)=>{
+  let div=document.createElement("div");
+  div.className="card";
+  div.innerHTML=`${q}
+  <select name="q${i+1}">
+    <option value="">Select</option>
+    <option value="5">5 - Strongly Agree</option>
+    <option value="4">4 - Agree</option>
+    <option value="3">3 - Neutral</option>
+    <option value="2">2 - Disagree</option>
+    <option value="1">1 - Strongly Disagree</option>
+  </select>`;
+  form.appendChild(div);
+});
+
+document.addEventListener("change", ()=>{
+ let answered=0;
+ for(let i=1;i<=30;i++){
+   if(document.forms[0][`q${i}`].value) answered++;
+ }
+ document.getElementById("bar").style.width=(answered/30)*100+"%";
+});
+
+function interpret(mean){
+ if(mean>=4.21) return "Very High Preparedness";
+ if(mean>=3.41) return "High Preparedness";
+ if(mean>=2.61) return "Moderate Preparedness";
+ if(mean>=1.81) return "Low Preparedness";
+ return "Very Low Preparedness";
+}
+
+function submitForm(){
+ let total=0;
+ for(let i=1;i<=30;i++){
+  let val=document.forms[0][`q${i}`].value;
+  if(!val){ alert("Answer all questions"); return; }
+  total+=parseInt(val);
+ }
+ let mean=total/30;
+ let interpretation=interpret(mean);
+
+ let output=`
+ <div class="result-card" style="background:#4CAF50">
+ <h2>Overall Result</h2>
+ <p>Mean: ${mean.toFixed(2)}</p>
+ <p><b>${interpretation}</b></p>
+ </div>
+ <button onclick="location.reload()">Retake</button>
+ `;
+
+ document.getElementById("result").innerHTML=output;
+ document.getElementById("result").style.display="block";
+}
+
+</script>
+</body>
+</html>
